@@ -1,0 +1,46 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Painel</title><style>
+*{box-sizing:border-box}body{font:16px/1.5 system-ui,sans-serif;margin:0;background:#F5F9FC;color:#16263d;padding-bottom:40px}
+header{background:#0B1F3A;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+nav{display:flex;gap:6px;padding:10px;overflow:auto;background:#fff;border-bottom:1px solid #dfe8f1;position:sticky;top:50px;z-index:4}
+nav button{flex:none;border:0;background:#eef4fa;padding:10px 14px;border-radius:99px;font:600 .9rem system-ui;color:#0B1F3A}nav button.on{background:#0B1F3A;color:#fff}
+main{max-width:720px;margin:auto;padding:14px}.box{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(11,31,58,.06)}
+label{display:block;font-weight:600;font-size:.88rem;margin:12px 0 4px}input,textarea,select{width:100%;padding:12px;border:1px solid #cdd9e6;border-radius:10px;font:inherit}textarea{min-height:130px}
+.b{border:0;background:#2FBF8F;color:#04261c;font-weight:700;padding:13px 18px;border-radius:12px;margin-top:14px;font-size:1rem;cursor:pointer}.b.s{background:#eef4fa;color:#0B1F3A;padding:8px 12px;margin:0;font-size:.85rem}.b.d{background:#fde8e8;color:#a11}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}.m{background:#fff;border-radius:12px;overflow:hidden;border:2px solid transparent}.m.main{border-color:#2FBF8F}
+.m img,.m video{width:100%;height:110px;object-fit:cover;display:block}.m div{display:flex;flex-wrap:wrap;gap:4px;padding:6px}
+.st{display:grid;grid-template-columns:1fr 1fr;gap:10px}.st b{font-size:1.3rem;display:block}table{width:100%;border-collapse:collapse;font-size:.88rem}td{padding:8px 4px;border-bottom:1px solid #eef2f6}
+#msg{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#0B1F3A;color:#fff;padding:10px 18px;border-radius:99px;display:none;z-index:9}
+</style></head><body>
+<div id="login" style="max-width:360px;margin:12vh auto;padding:16px"><div class="box"><h2>Entrar</h2>
+<label>Usuário</label><input id="u" autocomplete="username"><label>Senha</label><input id="p" type="password" autocomplete="current-password">
+<button class="b" id="lg" style="width:100%">Entrar</button></div></div>
+<div id="app" style="display:none"><header><b>Painel da campanha</b><a href="/" style="color:#7CC4FF">Ver site</a></header>
+<nav id="nav"></nav><main id="main"></main></div><div id="msg"></div>
+<script>
+const $=id=>document.getElementById(id),R=n=>Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const toast=t=>{$('msg').textContent=t;$('msg').style.display='block';setTimeout(()=>$('msg').style.display='none',2200)};
+const api=async(p,o={})=>{const r=await fetch('/api/admin'+p,{...o,headers:o.body instanceof FormData?{}:{'Content-Type':'application/json'},body:o.body&&!(o.body instanceof FormData)?JSON.stringify(o.body):o.body});if(r.status==401&&p!='/login'){location.reload()}const j=await r.json();if(!r.ok)throw j.error;return j};
+const tabs={Resumo,Textos,Mídia:media,Atualizações:updates};let cur='Resumo';
+function nav(){$('nav').innerHTML=Object.keys(tabs).map(t=>`<button class="${t==cur?'on':''}" onclick="cur='${t}';nav();tabs[cur]()">${t}</button>`).join('')}
+$('lg').onclick=async()=>{try{await api('/login',{method:'POST',body:{user:$('u').value,password:$('p').value}});start()}catch(e){toast(e)}};
+async function start(){try{await api('/me');$('login').style.display='none';$('app').style.display='';nav();tabs[cur]()}catch{}}
+async function Resumo(){const {rows,stats}=await api('/donations');$('main').innerHTML=`<div class="box st"><div><b>${R(stats.total)}</b>arrecadado</div><div><b>${stats.n}</b>doações confirmadas</div><div><b>${R(stats.avg)}</b>média</div><div><b>${R(stats.max)}</b>maior doação</div></div>
+<div class="box"><a class="b" style="display:inline-block;text-decoration:none" href="/api/admin/export.csv">Exportar relatório (CSV)</a>
+<table style="margin-top:12px">${rows.map(r=>`<tr><td>${esc(r.name||'Anônimo')}</td><td>${R(r.amount)}</td><td>${r.status=='confirmed'?'✅ confirmada':r.status=='pending'?`⏳ <button class="b s" onclick="cf(${r.id})">Recebi</button> <button class="b s d" onclick="dd(${r.id})">x</button>`:'✖ expirada'}</td></tr>`).join('')}</table></div>`}
+async function cf(id){await api('/donations/'+id+'/confirm',{method:'POST'});Resumo()}
+async function dd(id){await api('/donations/'+id,{method:'DELETE'});Resumo()}
+async function Textos(){const d=await api('/settings');const f=[['title','Título','input'],['subtitle','Descrição curta','input'],['goal','Meta (R$)','input'],['story','Nossa história','textarea'],['purpose','Finalidade do dinheiro','textarea'],['thanks','Agradecimentos aos doadores','textarea'],['pix_key','Chave Pix (seu telefone com DDD, e-mail, CPF ou chave aleatória)','input'],['pix_name','Nome que aparece no Pix (sem acento)','input'],['pix_city','Cidade','input']];
+$('main').innerHTML=`<div class="box">${f.map(([k,l,t])=>`<label>${l}</label><${t} id="s_${k}">${t=='input'?'':esc(d[k])}</${t}>`).join('')}<button class="b" id="sv">Salvar</button></div>`;
+f.forEach(([k,,t])=>{if(t=='input')$('s_'+k).value=d[k]});
+$('sv').onclick=async()=>{try{await api('/settings',{method:'PUT',body:Object.fromEntries(f.map(([k])=>[k,$('s_'+k).value]))});toast('Salvo')}catch(e){toast(e)}}}
+async function media(){const l=await api('/media');$('main').innerHTML=`<div class="box"><label>Enviar fotos e vídeos</label><input type="file" id="fl" multiple accept="image/*,video/*"><button class="b" id="upb">Enviar</button></div>
+<div class="g">${l.map(m=>`<div class="m ${m.is_main?'main':''}">${m.kind=='video'?`<video src="/uploads/${m.file}" muted></video>`:`<img src="/uploads/${m.file}">`}<div>${m.kind=='image'&&!m.is_main?`<button class="b s" onclick="mm(${m.id},'main')">Principal</button>`:m.is_main?'<small>★ principal</small>':''}<button class="b s" onclick="mm(${m.id},'up')">↑</button><button class="b s" onclick="mm(${m.id},'down')">↓</button><button class="b s d" onclick="mm(${m.id},'del')">Excluir</button></div></div>`).join('')}</div>`;
+$('upb').onclick=async()=>{const fs=$('fl').files;if(!fs.length)return;const fd=new FormData();[...fs].forEach(f=>fd.append('files',f));$('upb').textContent='Enviando…';try{await api('/media',{method:'POST',body:fd});toast('Enviado');media()}catch(e){toast(e);$('upb').textContent='Enviar'}}}
+async function mm(id,a){try{if(a=='del'){if(!confirm('Excluir este arquivo?'))return;await api('/media/'+id,{method:'DELETE'})}else if(a=='main')await api(`/media/${id}/main`,{method:'POST'});else await api(`/media/${id}/move`,{method:'POST',body:{dir:a}});media()}catch(e){toast(e)}}
+async function updates(){const d=await (await fetch('/api/public')).json();$('main').innerHTML=`<div class="box"><label>Onde publicar</label><select id="us"><option value="treatment">Atualização do tratamento</option><option value="accounts">Prestação de contas</option></select><label>Título</label><input id="ut"><label>Texto</label><textarea id="ub"></textarea><button class="b" id="uadd">Publicar</button></div>
+${d.updates.map(u=>`<div class="box"><small>${u.section=='accounts'?'Prestação de contas':'Tratamento'}</small><b style="display:block">${esc(u.title)}</b><button class="b s d" style="margin-top:8px" onclick="du(${u.id})">Excluir</button></div>`).join('')}`;
+$('uadd').onclick=async()=>{try{await api('/updates',{method:'POST',body:{section:$('us').value,title:$('ut').value,body:$('ub').value}});toast('Publicado');updates()}catch(e){toast(e)}}}
+async function du(id){if(confirm('Excluir?')){await api('/updates/'+id,{method:'DELETE'});updates()}}
+start();
+</script></body></html>

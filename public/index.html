@@ -1,0 +1,99 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Campanha solidária</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0B1F3A;--navy2:#143561;--sky:#7CC4FF;--green:#2FBF8F;--ink:#16263d;--mist:#F5F9FC;--line:#dfe8f1}
+*{box-sizing:border-box;margin:0}html{scroll-behavior:smooth}
+body{font:16px/1.65 Manrope,system-ui,sans-serif;color:var(--ink);background:#fff;padding-bottom:84px}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;color:var(--navy);line-height:1.15}
+.hero{position:relative;color:#fff;background:linear-gradient(160deg,var(--navy),var(--navy2));overflow:hidden;padding:max(20px,env(safe-area-inset-top)) 20px 36px}
+.hero::before{content:"";position:absolute;inset:0;background:var(--bg) center/cover;opacity:.38}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,31,58,.2),var(--navy) 92%)}
+canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.wrap{position:relative;z-index:2;max-width:1040px;margin:auto;display:grid;gap:22px;padding-top:min(32vh,220px)}
+.hero h1{color:#fff;font-size:clamp(2rem,6vw,3.4rem);max-width:15ch}.hero p.sub{color:#cfe3f7;max-width:46ch}
+.card{background:rgba(255,255,255,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.25);border-radius:22px;padding:22px;box-shadow:0 20px 50px rgba(3,12,30,.35)}
+.total{font:600 clamp(2.2rem,8vw,3.2rem)/1 Fraunces,serif}.muted{color:#b9d3ee;font-size:.92rem}
+.bar{height:12px;border-radius:99px;background:rgba(255,255,255,.18);margin:14px 0 8px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--sky),var(--green));transition:width 1.6s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 18px rgba(47,191,143,.7)}
+.row{display:flex;justify-content:space-between;gap:10px}
+.amts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.amts button{font:700 1rem Manrope;padding:14px 0;border-radius:14px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;transition:transform .15s,background .2s}
+.amts button:active{transform:scale(.95)}.amts button.on{background:#fff;color:var(--navy);border-color:#fff;box-shadow:0 0 0 4px rgba(124,196,255,.4)}
+.cta{display:block;width:100%;margin-top:14px;padding:16px;border:0;border-radius:16px;font:700 1.05rem Manrope;color:#04261c;background:linear-gradient(135deg,#5fe0b5,var(--green));cursor:pointer;box-shadow:0 10px 26px rgba(47,191,143,.45);transition:transform .15s}
+.cta:active{transform:scale(.97)}.cta:disabled{opacity:.6}
+input.f{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;font:500 1rem Manrope;margin-top:10px}
+input.f::placeholder{color:#b9d3ee}
+section{max-width:720px;margin:auto;padding:72px 22px 0}section h2{font-size:clamp(1.7rem,5vw,2.4rem);margin-bottom:20px}
+.txt{white-space:pre-wrap;font-size:1.08rem;line-height:1.85}
+.gal{display:grid;gap:12px;margin:26px -6px 0}.gal img,.gal video{width:100%;border-radius:18px;display:block;background:var(--mist)}
+.upd{border-left:3px solid var(--green);padding:2px 0 2px 16px;margin-bottom:22px}.upd small{color:#6b7f95}.upd h3{font-size:1.25rem;margin:2px 0 6px}
+.badge{display:inline-block;background:#fff3cd;color:#6b4e00;border-radius:99px;padding:4px 12px;font-size:.8rem;font-weight:700;margin-bottom:10px}
+footer{text-align:center;color:#6b7f95;font-size:.85rem;padding:60px 20px 20px}
+.fix{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);display:none}
+.fix .cta{margin:0}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(5,15,32,.6);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center}
+.modal.on{display:flex}.sheet{background:#fff;width:100%;max-width:440px;border-radius:26px 26px 0 0;padding:26px 22px calc(26px + env(safe-area-inset-bottom));text-align:center;animation:up .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.sheet img{width:220px;height:220px;margin:14px auto;display:block;border:1px solid var(--line);border-radius:16px;padding:8px}
+.code{word-break:break-all;font:.75rem monospace;background:var(--mist);padding:10px;border-radius:12px;max-height:70px;overflow:auto;text-align:left}
+.sheet .cta{color:#fff;background:var(--navy);box-shadow:none}.ok{color:var(--green);font-size:3rem}
+@media(min-width:860px){.wrap{grid-template-columns:1.2fr 1fr;align-items:end}.fix{display:none!important}.modal{align-items:center}.sheet{border-radius:26px}.gal{grid-template-columns:1fr 1fr}}
+@media(max-width:859px){.fix{display:block}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}canvas{display:none}}
+</style></head><body>
+<header class="hero" id="hero"><canvas id="fx"></canvas>
+<div class="wrap"><div><h1 id="title"></h1><p class="sub" id="sub" style="margin-top:14px"></p></div>
+<div class="card" id="give">
+<div class="muted">Arrecadado</div><div class="total" id="total">R$ 0</div>
+<div class="bar"><i id="fill"></i></div>
+<div class="row muted"><span id="pct"></span><span id="goal"></span></div><div class="muted" id="donors" style="margin-top:4px"></div>
+<div class="amts" id="amts"></div>
+<input class="f" id="custom" inputmode="decimal" placeholder="Outro valor (R$)">
+<input class="f" id="name" placeholder="Seu nome (opcional)" maxlength="60">
+<button class="cta" id="go">Contribuir com Pix</button></div></div></header>
+<section><h2>Nossa história</h2><div class="txt" id="story"></div><div class="gal" id="gal"></div></section>
+<section><h2>Para onde vai cada real</h2><div class="txt" id="purpose"></div></section>
+<section id="tr"><h2>Atualizações do tratamento</h2><div id="treat"></div></section>
+<section id="ac"><h2>Prestação de contas</h2><div id="accts"></div></section>
+<section id="th" style="display:none"><h2>Gratidão</h2><div class="txt" id="thanks"></div></section>
+<footer>Pagamentos processados via Pix. Nenhum dado bancário é armazenado neste site.</footer>
+<div class="fix"><button class="cta" id="go2">Contribuir com Pix</button></div>
+<div class="modal" id="m"><div class="sheet" id="sheet"></div></div>
+<script>
+const $=id=>document.getElementById(id),R=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let amount=50,poll;
+$('amts').innerHTML=[10,20,50,100,200].map(v=>`<button data-v="${v}" class="${v==50?'on':''}">R$ ${v}</button>`).join('');
+$('amts').onclick=e=>{const b=e.target.closest('button');if(!b)return;amount=+b.dataset.v;$('custom').value='';[...$('amts').children].forEach(x=>x.classList.toggle('on',x==b));navigator.vibrate?.(8)};
+$('custom').oninput=e=>{const v=parseFloat(e.target.value.replace(',','.'));if(v>0){amount=v;[...$('amts').children].forEach(x=>x.classList.remove('on'))}};
+function count(el,to){const t0=performance.now();(function f(t){const p=Math.min((t-t0)/1400,1);el.textContent=R(to*(1-Math.pow(1-p,3)));p<1&&requestAnimationFrame(f)})(t0)}
+async function load(){const d=await (await fetch('/api/public')).json();document.title=d.title;
+$('title').textContent=d.title;$('sub').textContent=d.subtitle;
+const main=d.media.find(m=>m.is_main);if(main)$('hero').style.setProperty('--bg',`url(/uploads/${main.file})`);
+const g=+d.goal||1,p=Math.min(100,d.total/g*100);count($('total'),d.total);setTimeout(()=>$('fill').style.width=p+'%',200);
+$('pct').textContent=p.toFixed(1).replace('.',',')+'% da meta';$('goal').textContent='Meta '+R(g);
+$('donors').textContent=d.donors?`${d.donors} ${d.donors==1?'doação confirmada':'doações confirmadas'}`:'Seja a primeira pessoa a contribuir';
+$('story').textContent=d.story;$('purpose').textContent=d.purpose;
+if(d.thanks){$('th').style.display='';$('thanks').textContent=d.thanks}
+$('gal').innerHTML=d.media.map(m=>m.kind=='video'?`<video src="/uploads/${m.file}" controls playsinline preload="metadata"></video>`:`<img src="/uploads/${m.file}" loading="lazy" alt="">`).join('');
+const U=s=>d.updates.filter(u=>u.section==s).map(u=>`<div class="upd"><small>${new Date(u.created).toLocaleDateString('pt-BR')}</small><h3>${esc(u.title)}</h3><div class="txt" style="font-size:1rem">${esc(u.body)}</div></div>`).join('')||'<p class="muted" style="color:#6b7f95">Ainda não há atualizações publicadas.</p>';
+$('treat').innerHTML=U('treatment');$('accts').innerHTML=`<p style="margin-bottom:18px">Total confirmado até agora: <b>${R(d.total)}</b> de ${R(g)}.</p>`+U('accounts');
+window.TEST=d.test}
+async function give(){if(!(amount>=5))return alert('O valor mínimo é R$ 5.');
+const b=$('go');b.disabled=true;
+try{const r=await fetch('/api/donate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount,name:$('name').value})});const d=await r.json();if(!r.ok)throw d.error;
+$('sheet').innerHTML=`${d.test?'<div class="badge">Ambiente de testes</div>':''}<h3>Pague ${R(amount)} com Pix</h3><img src="data:image/png;base64,${d.qr64}" alt="QR Code Pix"><p class="muted" style="color:#6b7f95;margin-bottom:8px">Ou copie o código:</p><div class="code" id="cc">${esc(d.qr)}</div><button class="cta" id="cp">Copiar código Pix</button><p class="muted" style="color:#6b7f95;margin-top:12px">${d.manual?'O valor entra no total depois que a família confirmar o recebimento.':'Aguardando pagamento…'}</p>`;
+$('m').classList.add('on');$('cp').onclick=async()=>{try{await navigator.clipboard.writeText(d.qr)}catch{const s=getSelection(),r=document.createRange();r.selectNodeContents($('cc'));s.removeAllRanges();s.addRange(r)}$('cp').textContent='Código copiado'};
+clearInterval(poll);poll=setInterval(async()=>{const s=await (await fetch('/api/donate/'+d.id)).json();
+if(s.status=='confirmed'){clearInterval(poll);$('sheet').innerHTML=`<div class="ok">✓</div><h3>Pagamento confirmado</h3><p style="margin:10px 0 18px">Muito obrigado. Sua contribuição faz diferença.</p><button class="cta" onclick="location.reload()">Fechar</button>`}
+else if(s.status=='failed'){clearInterval(poll);$('sheet').innerHTML=`<h3>Pix expirado</h3><p style="margin:10px 0 18px">Gere um novo código para contribuir.</p><button class="cta" onclick="location.reload()">Voltar</button>`}},3000)}
+catch(e){alert(e||'Erro ao gerar Pix.')}b.disabled=false}
+$('go').onclick=give;$('go2').onclick=()=>{$('give').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(give,450)};
+$('m').onclick=e=>{if(e.target==$('m')){$('m').classList.remove('on');clearInterval(poll)}};
+// partículas de luz, discretas
+const c=$('fx'),x=c.getContext('2d');let P=[];function sz(){c.width=c.offsetWidth;c.height=c.offsetHeight;P=Array.from({length:Math.min(36,c.width/22|0)},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.8+.4,v:Math.random()*.25+.08}))}
+sz();addEventListener('resize',sz);(function a(){x.clearRect(0,0,c.width,c.height);for(const p of P){p.y-=p.v;if(p.y<-5)p.y=c.height+5;x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fillStyle='rgba(160,225,255,.55)';x.fill()}requestAnimationFrame(a)})();
+load();
+</script></body></html>
