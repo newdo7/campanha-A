@@ -13,7 +13,7 @@ label{display:block;font-weight:600;font-size:.88rem;margin:12px 0 4px}input,tex
 #msg{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#0B1F3A;color:#fff;padding:10px 18px;border-radius:99px;display:none;z-index:9}
 </style></head><body>
 <div id="login" style="max-width:360px;margin:12vh auto;padding:16px"><div class="box"><h2>Entrar</h2>
-<label>Usuário</label><input id="u" autocomplete="username"><label>Senha</label><input id="p" type="password" autocomplete="current-password">
+<label>Usuário</label><input id="u" type="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next"><label>Senha</label><input id="p" type="password" autocomplete="new-password" enterkeyhint="go">
 <button class="b" id="lg" style="width:100%">Entrar</button></div></div>
 <div id="app" style="display:none"><header><b>Painel da campanha</b><a href="/" style="color:#7CC4FF">Ver site</a></header>
 <nav id="nav"></nav><main id="main"></main></div><div id="msg"></div>
@@ -23,6 +23,7 @@ const toast=t=>{$('msg').textContent=t;$('msg').style.display='block';setTimeout
 const api=async(p,o={})=>{const r=await fetch('/api/admin'+p,{...o,headers:o.body instanceof FormData?{}:{'Content-Type':'application/json'},body:o.body&&!(o.body instanceof FormData)?JSON.stringify(o.body):o.body});if(r.status==401&&p!='/login'){location.reload()}const j=await r.json();if(!r.ok)throw j.error;return j};
 const tabs={Resumo,Textos,Mídia:media,Atualizações:updates};let cur='Resumo';
 function nav(){$('nav').innerHTML=Object.keys(tabs).map(t=>`<button class="${t==cur?'on':''}" onclick="cur='${t}';nav();tabs[cur]()">${t}</button>`).join('')}
+$('p').addEventListener('keydown',e=>{if(e.key==='Enter')$('lg').click()});
 $('lg').onclick=async()=>{try{await api('/login',{method:'POST',body:{user:$('u').value,password:$('p').value}});start()}catch(e){toast(e)}};
 async function start(){try{await api('/me');$('login').style.display='none';$('app').style.display='';nav();tabs[cur]()}catch{}}
 async function Resumo(){const {rows,stats}=await api('/donations');$('main').innerHTML=`<div class="box st"><div><b>${R(stats.total)}</b>arrecadado</div><div><b>${stats.n}</b>doações confirmadas</div><div><b>${R(stats.avg)}</b>média</div><div><b>${R(stats.max)}</b>maior doação</div></div>
